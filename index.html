@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OG Calendar</title>
+<style>
+:root{
+  --bg:#f4f7f1;--card:#fff;--text:#172019;--muted:#647065;--line:#dbe3da;
+  --green:#2e7d32;--green2:#e6f4e6;--purple:#6a3fa0;--purple2:#f0e9fb;
+  --orange:#b45f06;--orange2:#fff2df;--red:#b3261e;--red2:#ffe9e7;
+  --blue:#1d5f91;--blue2:#e6f2fb;--yellow:#836300;--yellow2:#fff8d8;
+  --shadow:0 8px 24px rgba(22,40,24,.08);--radius:18px;
+  --header1:#245f28;--header2:#3f9144;--input:#fff;--toast:#172019;
+}
+body.dark{
+  --bg:#101612;--card:#182019;--text:#edf4ee;--muted:#aab8ac;--line:#304033;
+  --green:#7bc77e;--green2:#19331d;--purple:#c0a4ff;--purple2:#2b2140;
+  --orange:#ffc27a;--orange2:#3e2b18;--red:#ff8b82;--red2:#401f1d;
+  --blue:#8cc8ff;--blue2:#172b3c;--yellow:#ffe082;--yellow2:#3b3217;
+  --shadow:0 8px 24px rgba(0,0,0,.28);--header1:#102719;--header2:#245f28;--input:#101612;--toast:#f2f7f2;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,var(--header1),var(--header2));color:#fff;padding:14px;box-shadow:0 3px 12px rgba(0,0,0,.12)}
+.head{display:flex;gap:12px;align-items:center}.logo{width:62px;height:46px;object-fit:contain;background:transparent;flex:0 0 auto}
+h1{font-size:1.35rem;margin:0}.sub{font-size:.82rem;font-style:italic;opacity:.95;line-height:1.25;margin-top:4px}
+main{padding:14px 12px 96px;max-width:820px;margin:auto}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px;z-index:10;box-shadow:0 -6px 18px rgba(0,0,0,.08)}
+.tab{border:0;background:transparent;border-radius:12px;padding:8px 2px;color:var(--muted);font-size:.72rem;font-weight:800}.tab span{display:block;font-size:1.1rem}.tab.active{background:var(--green2);color:var(--green)}
+section{display:none}.section.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:12px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px}
+.itemHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.title{font-weight:900}.big{font-size:1.15rem;font-weight:900}.muted{color:var(--muted)}.tiny{font-size:.75rem}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:.78rem;color:var(--muted);font-weight:800;margin:0 0 5px}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px 11px;font:inherit;background:var(--input);color:var(--text)}
+textarea{min-height:82px;resize:vertical}
+.btn{border:0;border-radius:14px;background:var(--green);color:#fff;font-weight:850;padding:12px 14px;font:inherit;cursor:pointer}
+body.dark .btn{color:#071208}.btn.secondary{background:var(--green2);color:var(--text);border:1px solid var(--line)}.btn.danger{background:var(--red);color:#fff}
+.btn.small{padding:8px 10px;border-radius:11px;font-size:.86rem}.btn.full{width:100%}.inlineBtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:.78rem;font-weight:850;white-space:nowrap}
+.growth{background:var(--green2);color:var(--green)}.flower{background:var(--purple2);color:var(--purple)}.harvest{background:var(--orange2);color:var(--orange)}.problem{background:var(--red2);color:var(--red)}.water{background:var(--blue2);color:var(--blue)}.feed{background:#efe7ff;color:#5b35a3}.prune{background:#e5f5dc;color:#34751f}.preventive{background:var(--yellow2);color:var(--yellow)}.transplant{background:#e8f4ed;color:#2d6a3d}
+body.dark .feed{background:#2b2140;color:#c0a4ff}body.dark .prune{background:#19331d;color:#9ad08e}body.dark .transplant{background:#19331d;color:#9ad08e}
+.progress{height:10px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0}.bar{height:100%;background:linear-gradient(90deg,#69a96e,#7b55ad)}
+.event{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px}
+.event.problem{border-left:5px solid var(--red)}.event.water{border-left:5px solid var(--blue)}.event.feed{border-left:5px solid #6a3fa0}.event.prune{border-left:5px solid #4d8b31}.event.preventive{border-left:5px solid #c2a000}.event.harvest{border-left:5px solid var(--orange)}.event.transplant{border-left:5px solid #2d6a3d}.event.flower{border-left:5px solid var(--purple)}
+.empty{text-align:center;color:var(--muted);padding:20px 8px}.hidden{display:none!important}
+.toast{position:fixed;left:14px;right:14px;bottom:88px;background:var(--toast);color:var(--card);padding:12px 14px;border-radius:14px;z-index:80;display:none}
+body.dark .toast{color:#101612}.warn{background:var(--yellow2);border:1px solid rgba(180,140,40,.45);border-radius:14px;padding:10px;color:var(--yellow);font-size:.88rem}
+.photo{width:100%;max-height:220px;object-fit:cover;border-radius:14px;border:1px solid var(--line);margin-top:8px}.month{margin:16px 0 8px}.day{display:grid;grid-template-columns:52px 1fr;gap:8px;margin-bottom:8px}.datebox{background:var(--card);border:1px solid var(--line);border-radius:14px;text-align:center;padding:8px 4px;font-weight:900;color:var(--green)}
+.welcome{position:fixed;inset:0;z-index:60;background:linear-gradient(160deg,#0f4b22,#3f9144 55%,#e8f4df);display:flex;align-items:center;justify-content:center;padding:20px;color:#fff}
+body.dark .welcome{background:linear-gradient(160deg,#07120a,#15351d 55%,#101612)}
+.welcomeCard{width:min(520px,100%);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);border-radius:28px;padding:24px;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.22)}
+.welcomeCard img{width:min(340px,86vw);max-height:45vh;object-fit:contain;background:transparent;margin-bottom:14px}.welcomeCard h1{font-size:2.1rem;margin:6px 0 10px}.welcomeCard p{font-style:italic;line-height:1.35}
+.welcomeControls{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:360px;margin:0 auto 12px;text-align:left}
+.welcomeControls label{color:white}.switchRow{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:.95rem}
+.switch{appearance:none;width:46px;height:26px;border-radius:999px;background:rgba(255,255,255,.35);position:relative;outline:none;cursor:pointer}
+.switch:checked{background:#102719}.switch:before{content:'';position:absolute;width:20px;height:20px;border-radius:50%;left:3px;top:3px;background:white;transition:.2s}.switch:checked:before{left:23px}
+@media(min-width:680px){main{padding-bottom:24px}.tabs{position:sticky;top:74px;bottom:auto;max-width:820px;margin:0 auto;border:1px solid var(--line);border-radius:0 0 18px 18px}.tab span{display:inline;margin-right:5px}}
+</style>
+</head>
+<body>
+<div id="welcome" class="welcome">
+  <div class="welcomeCard">
+    <img src="logo.png" alt="OG Calendar">
+    <h1>OG Calendar</h1>
+    <p id="dedicationWelcome"></p>
+    <div class="welcomeControls">
+      <div>
+        <label id="langLabel" for="langSelect"></label>
+        <select id="langSelect">
+          <option value="ca">Català</option>
+          <option value="es">Castellano</option>
+          <option value="en">English</option>
+          <option value="da">Dansk</option>
+        </select>
+      </div>
+      <div>
+        <label id="themeLabel"></label>
+        <div class="switchRow"><input id="darkSwitchWelcome" class="switch" type="checkbox"><span id="darkTextWelcome"></span></div>
+      </div>
+    </div>
+    <button id="enterBtn" class="btn" type="button">Accedir</button>
+  </div>
+</div>
+<header><div class="head"><img class="logo" src="logo.png" alt="OG Calendar"><div><h1>OG Calendar</h1><div class="sub" id="dedicationHeader"></div></div></div></header>
+<main>
+<section id="today" class="section active"></section><section id="varieties" class="section"></section><section id="log" class="section"></section><section id="calendar" class="section"></section><section id="backup" class="section"></section>
+</main>
+<nav class="tabs"><button class="tab active" data-tab="today"><span>🌱</span></button><button class="tab" data-tab="varieties"><span>🪴</span></button><button class="tab" data-tab="log"><span>📝</span></button><button class="tab" data-tab="calendar"><span>📅</span></button><button class="tab" data-tab="backup"><span>💾</span></button></nav>
+<div id="toast" class="toast"></div>
+<script>
+const KEY='og_calendar_data_v19', OLD=['cultiu_calendari_v1','og_calendar_data_v17','og_calendar_data_v19'], LANG_KEY='og_calendar_lang_v1', DARK_KEY='og_calendar_dark_v1';
+const months=[2,3,4,5,6,7,8,9,10];
+const INTERNAL_TYPES=['Automàtiques','Fotoperiòdiques','Fast Version','Altres'];
+const INTERNAL_ACTIONS=['Germinació','Trasplantament','Inici floració','Reg','Fertilitzant creixement','Fertilitzant floració','Poda','Preventiu','Plaga/problema','Observació','Collita','Altres'];
+const HARVEST_SLOTS=['','1a setmana de setembre','2a setmana de setembre','3a setmana de setembre','4a setmana de setembre',"1a setmana d'octubre","2a setmana d'octubre","3a setmana d'octubre","4a setmana d'octubre",'1a setmana de novembre','2a setmana de novembre','3a setmana de novembre','4a setmana de novembre'];
+
+const I18N={
+ca:{
+title:'OG Calendar',dedication:'Al meu pare, i a tots els qui han sembrat amb la llavor de la llibertat la vida dels seus fills, gràcies!! Us devem la collita.',lang:'Idioma',theme:'Tema',darkMode:'Mode fosc',enter:'Accedir',
+tab_today:'Avui',tab_varieties:'Varietats',tab_log:'Registre',tab_calendar:'Calendari',tab_backup:'Còpies',
+season:'Temporada',seasonRange:'De març a novembre',created:'varietats creades',noVar:'Encara no tens varietats. Importa una còpia a Còpies.',recent:'Últims registres',noLogs:'Cap registre encara.',noBrand:'Sense marca',
+addRecord:'Afegir registre',edit:'Editar',delete:'Eliminar',newVariety:'Nova varietat',editVariety:'Editar varietat',varieties:'Varietats',created2:'creades',list:'Llistat',
+name:'Nom',brand:'Marca',type:'Tipus',germination:'Germinació',flowerStart:'Inici floració',flowerTime:'Temps de floració',dontKnow:'No ho sé',weeks:'setmanes',outdoorHarvest:'Collita exterior marca',notes:'Notes',saveVariety:'Guardar varietat',cancel:'Cancel·lar',
+growth:'Creixement',flowering:'Floració',finished:'Finalitzada',generalAll:'General / totes',date:'Data',variety:'Varietat',action:'Acció',photo:'Foto',note:'Nota',saveRecord:'Guardar registre',history:'Historial',
+copies:'Còpies i seguretat',copiesText:'Exporta i importa les dades en JSON.',copiesWarn:'Si canvies de versió, conserva sempre una còpia exportada.',exportCopy:'Exportar còpia',importCopy:'Importar còpia',status:'Estat',saved:'Últim guardat',records:'Registres',
+germLine:'Germinació: <b>{date}</b> · fa <b>{days}</b> dies',growthDay:'Creixement: <b>dia {n}</b>',flowerLine:'Floració: <b>estàs a la setmana {w} de floració · dia {d}</b>',harvestEst:'Collita estimada: <b>{date}</b> · falten {days} dies aprox.',harvestPast:'Collita estimada: <b>{date}</b> · fa {days} dies',outdoorLine:'Collita exterior marca: <b>{text}</b>',
+imported:'Importat: {v} varietats i {l} registres',exported:'Còpia exportada',cantImport:'No he pogut importar aquest JSON',maxVar:'Màxim 10 varietats',setName:'Posa un nom',pickDate:'Tria una data',varSaved:'Varietat guardada.',logSaved:'Registre guardat.',deleted:'Eliminada.',logDeleted:'Registre eliminat.',confirmDeleteVar:'Eliminar aquesta varietat i els seus registres?',confirmDeleteLog:'Eliminar aquest registre?',confirmNewSeason:'Crear temporada nova? Exporta còpia abans.',newSeason:'Crear temporada nova',seasonCreated:'Temporada nova creada.',
+noRecords:'Sense registres',harvestEstimated:'Collita estimada',estimate:'Estimació',fromGerm:'setmanes des de germinació',fromFlower:'setmanes de floració',
+typeAuto:'Automàtiques',typePhoto:'Fotoperiòdiques',typeFast:'Fast Version',typeOther:'Altres',
+actGerm:'Germinació',actTransplant:'Trasplantament',actFlower:'Inici floració',actWater:'Reg',actFeedG:'Fertilitzant creixement',actFeedF:'Fertilitzant floració',actPrune:'Poda',actPrev:'Preventiu',actProblem:'Plaga/problema',actObs:'Observació',actHarvest:'Collita',actOther:'Altres',
+months:['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'],
+slots:['No ho sé','1a setmana de setembre','2a setmana de setembre','3a setmana de setembre','4a setmana de setembre',"1a setmana d'octubre","2a setmana d'octubre","3a setmana d'octubre","4a setmana d'octubre",'1a setmana de novembre','2a setmana de novembre','3a setmana de novembre','4a setmana de novembre']
+},
+es:{
+title:'OG Calendar',dedication:'A mi padre, y a todos quienes han sembrado con la semilla de la libertad la vida de sus hijos, ¡gracias! Os debemos la cosecha.',lang:'Idioma',theme:'Tema',darkMode:'Modo oscuro',enter:'Acceder',
+tab_today:'Hoy',tab_varieties:'Variedades',tab_log:'Registro',tab_calendar:'Calendario',tab_backup:'Copias',
+season:'Temporada',seasonRange:'De marzo a noviembre',created:'variedades creadas',noVar:'Aún no tienes variedades. Importa una copia en Copias.',recent:'Últimos registros',noLogs:'Aún no hay registros.',noBrand:'Sin marca',
+addRecord:'Añadir registro',edit:'Editar',delete:'Eliminar',newVariety:'Nueva variedad',editVariety:'Editar variedad',varieties:'Variedades',created2:'creadas',list:'Listado',
+name:'Nombre',brand:'Marca',type:'Tipo',germination:'Germinación',flowerStart:'Inicio floración',flowerTime:'Tiempo de floración',dontKnow:'No lo sé',weeks:'semanas',outdoorHarvest:'Cosecha exterior marca',notes:'Notas',saveVariety:'Guardar variedad',cancel:'Cancelar',
+growth:'Crecimiento',flowering:'Floración',finished:'Finalizada',generalAll:'General / todas',date:'Fecha',variety:'Variedad',action:'Acción',photo:'Foto',note:'Nota',saveRecord:'Guardar registro',history:'Historial',
+copies:'Copias y seguridad',copiesText:'Exporta e importa los datos en JSON.',copiesWarn:'Si cambias de versión, conserva siempre una copia exportada.',exportCopy:'Exportar copia',importCopy:'Importar copia',status:'Estado',saved:'Último guardado',records:'Registros',
+germLine:'Germinación: <b>{date}</b> · hace <b>{days}</b> días',growthDay:'Crecimiento: <b>día {n}</b>',flowerLine:'Floración: <b>estás en la semana {w} de floración · día {d}</b>',harvestEst:'Cosecha estimada: <b>{date}</b> · faltan {days} días aprox.',harvestPast:'Cosecha estimada: <b>{date}</b> · hace {days} días',outdoorLine:'Cosecha exterior marca: <b>{text}</b>',
+imported:'Importado: {v} variedades y {l} registros',exported:'Copia exportada',cantImport:'No he podido importar este JSON',maxVar:'Máximo 10 variedades',setName:'Pon un nombre',pickDate:'Elige una fecha',varSaved:'Variedad guardada.',logSaved:'Registro guardado.',deleted:'Eliminada.',logDeleted:'Registro eliminado.',confirmDeleteVar:'¿Eliminar esta variedad y sus registros?',confirmDeleteLog:'¿Eliminar este registro?',confirmNewSeason:'¿Crear temporada nueva? Exporta una copia antes.',newSeason:'Crear temporada nueva',seasonCreated:'Temporada nueva creada.',
+noRecords:'Sin registros',harvestEstimated:'Cosecha estimada',estimate:'Estimación',fromGerm:'semanas desde germinación',fromFlower:'semanas de floración',
+typeAuto:'Automáticas',typePhoto:'Fotoperiódicas',typeFast:'Fast Version',typeOther:'Otras',
+actGerm:'Germinación',actTransplant:'Trasplante',actFlower:'Inicio floración',actWater:'Riego',actFeedG:'Fertilizante crecimiento',actFeedF:'Fertilizante floración',actPrune:'Poda',actPrev:'Preventivo',actProblem:'Plaga/problema',actObs:'Observación',actHarvest:'Cosecha',actOther:'Otros',
+months:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+slots:['No lo sé','1.ª semana de septiembre','2.ª semana de septiembre','3.ª semana de septiembre','4.ª semana de septiembre','1.ª semana de octubre','2.ª semana de octubre','3.ª semana de octubre','4.ª semana de octubre','1.ª semana de noviembre','2.ª semana de noviembre','3.ª semana de noviembre','4.ª semana de noviembre']
+},
+en:{
+title:'OG Calendar',dedication:'To my father, and to all who sowed with the seed of freedom the lives of their children, thank you! We owe you the harvest.',lang:'Language',theme:'Theme',darkMode:'Dark mode',enter:'Enter',
+tab_today:'Today',tab_varieties:'Varieties',tab_log:'Log',tab_calendar:'Calendar',tab_backup:'Backups',
+season:'Season',seasonRange:'From March to November',created:'varieties created',noVar:'You do not have any varieties yet. Import a backup in Backups.',recent:'Latest records',noLogs:'No records yet.',noBrand:'No brand',
+addRecord:'Add record',edit:'Edit',delete:'Delete',newVariety:'New variety',editVariety:'Edit variety',varieties:'Varieties',created2:'created',list:'List',
+name:'Name',brand:'Brand',type:'Type',germination:'Germination',flowerStart:'Start flowering',flowerTime:'Flowering time',dontKnow:"I don't know",weeks:'weeks',outdoorHarvest:'Brand outdoor harvest',notes:'Notes',saveVariety:'Save variety',cancel:'Cancel',
+growth:'Growth',flowering:'Flowering',finished:'Finished',generalAll:'General / all',date:'Date',variety:'Variety',action:'Action',photo:'Photo',note:'Note',saveRecord:'Save record',history:'History',
+copies:'Backups and safety',copiesText:'Export and import data in JSON.',copiesWarn:'If you change version, always keep an exported backup.',exportCopy:'Export backup',importCopy:'Import backup',status:'Status',saved:'Last saved',records:'Records',
+germLine:'Germination: <b>{date}</b> · <b>{days}</b> days ago',growthDay:'Growth: <b>day {n}</b>',flowerLine:'Flowering: <b>you are in week {w} of flowering · day {d}</b>',harvestEst:'Estimated harvest: <b>{date}</b> · about {days} days left',harvestPast:'Estimated harvest: <b>{date}</b> · {days} days ago',outdoorLine:'Brand outdoor harvest: <b>{text}</b>',
+imported:'Imported: {v} varieties and {l} records',exported:'Backup exported',cantImport:'Could not import this JSON',maxVar:'Maximum 10 varieties',setName:'Enter a name',pickDate:'Pick a date',varSaved:'Variety saved.',logSaved:'Record saved.',deleted:'Deleted.',logDeleted:'Record deleted.',confirmDeleteVar:'Delete this variety and its records?',confirmDeleteLog:'Delete this record?',confirmNewSeason:'Create a new season? Export a backup first.',newSeason:'Create new season',seasonCreated:'New season created.',
+noRecords:'No records',harvestEstimated:'Estimated harvest',estimate:'Estimate',fromGerm:'weeks from germination',fromFlower:'weeks of flowering',
+typeAuto:'Autoflower',typePhoto:'Photoperiod',typeFast:'Fast Version',typeOther:'Others',
+actGerm:'Germination',actTransplant:'Transplant',actFlower:'Start flowering',actWater:'Watering',actFeedG:'Growth fertilizer',actFeedF:'Flowering fertilizer',actPrune:'Pruning',actPrev:'Preventive',actProblem:'Pest/problem',actObs:'Observation',actHarvest:'Harvest',actOther:'Other',
+months:['January','February','March','April','May','June','July','August','September','October','November','December'],
+slots:["I don't know",'1st week of September','2nd week of September','3rd week of September','4th week of September','1st week of October','2nd week of October','3rd week of October','4th week of October','1st week of November','2nd week of November','3rd week of November','4th week of November']
+},
+da:{
+title:'OG Calendar',dedication:'Til min far og til alle, som såede frihedens frø i deres børns liv, tak! Vi skylder jer høsten.',lang:'Sprog',theme:'Tema',darkMode:'Mørk tilstand',enter:'Gå ind',
+tab_today:'I dag',tab_varieties:'Sorter',tab_log:'Register',tab_calendar:'Kalender',tab_backup:'Kopier',
+season:'Sæson',seasonRange:'Fra marts til november',created:'sorter oprettet',noVar:'Du har endnu ingen sorter. Importér en kopi under Kopier.',recent:'Seneste registreringer',noLogs:'Ingen registreringer endnu.',noBrand:'Intet mærke',
+addRecord:'Tilføj registrering',edit:'Rediger',delete:'Slet',newVariety:'Ny sort',editVariety:'Rediger sort',varieties:'Sorter',created2:'oprettet',list:'Liste',
+name:'Navn',brand:'Mærke',type:'Type',germination:'Spiring',flowerStart:'Start blomstring',flowerTime:'Blomstringstid',dontKnow:'Ved ikke',weeks:'uger',outdoorHarvest:'Udendørs høst fra mærke',notes:'Noter',saveVariety:'Gem sort',cancel:'Annuller',
+growth:'Vækst',flowering:'Blomstring',finished:'Afsluttet',generalAll:'Generel / alle',date:'Dato',variety:'Sort',action:'Handling',photo:'Foto',note:'Note',saveRecord:'Gem registrering',history:'Historik',
+copies:'Kopier og sikkerhed',copiesText:'Eksportér og importér data i JSON.',copiesWarn:'Hvis du skifter version, så gem altid en eksporteret kopi.',exportCopy:'Eksportér kopi',importCopy:'Importér kopi',status:'Status',saved:'Sidst gemt',records:'Registreringer',
+germLine:'Spiring: <b>{date}</b> · for <b>{days}</b> dage siden',growthDay:'Vækst: <b>dag {n}</b>',flowerLine:'Blomstring: <b>du er i uge {w} af blomstring · dag {d}</b>',harvestEst:'Forventet høst: <b>{date}</b> · cirka {days} dage tilbage',harvestPast:'Forventet høst: <b>{date}</b> · for {days} dage siden',outdoorLine:'Udendørs høst fra mærke: <b>{text}</b>',
+imported:'Importeret: {v} sorter og {l} registreringer',exported:'Kopi eksporteret',cantImport:'Kunne ikke importere denne JSON',maxVar:'Maksimalt 10 sorter',setName:'Skriv et navn',pickDate:'Vælg en dato',varSaved:'Sort gemt.',logSaved:'Registrering gemt.',deleted:'Slettet.',logDeleted:'Registrering slettet.',confirmDeleteVar:'Slet denne sort og dens registreringer?',confirmDeleteLog:'Slet denne registrering?',confirmNewSeason:'Opret ny sæson? Eksportér en kopi først.',newSeason:'Opret ny sæson',seasonCreated:'Ny sæson oprettet.',
+noRecords:'Ingen registreringer',harvestEstimated:'Forventet høst',estimate:'Estimat',fromGerm:'uger fra spiring',fromFlower:'ugers blomstring',
+typeAuto:'Automatiske',typePhoto:'Fotoperiodiske',typeFast:'Fast Version',typeOther:'Andre',
+actGerm:'Spiring',actTransplant:'Omplantning',actFlower:'Start blomstring',actWater:'Vanding',actFeedG:'Gødning vækst',actFeedF:'Gødning blomstring',actPrune:'Beskæring',actPrev:'Forebyggende',actProblem:'Skadedyr/problem',actObs:'Observation',actHarvest:'Høst',actOther:'Andet',
+months:['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'],
+slots:['Ved ikke','1. uge i september','2. uge i september','3. uge i september','4. uge i september','1. uge i oktober','2. uge i oktober','3. uge i oktober','4. uge i oktober','1. uge i november','2. uge i november','3. uge i november','4. uge i november']
+}
+};
+
+let LANG=localStorage.getItem(LANG_KEY)||'ca'; if(!I18N[LANG]) LANG='ca';
+let DARK=localStorage.getItem(DARK_KEY)==='1';
+function L(k,vars={}){let s=(I18N[LANG]&&I18N[LANG][k])||I18N.ca[k]||k; for(const [a,b] of Object.entries(vars)) s=s.replaceAll('{'+a+'}',b); return s;}
+function locale(){return LANG==='ca'?'ca-ES':LANG==='es'?'es-ES':LANG==='da'?'da-DK':'en-US'}
+function applyTheme(){document.body.classList.toggle('dark',DARK);document.getElementById('darkSwitchWelcome').checked=DARK;const b=document.getElementById('darkSwitchBackup');if(b)b.checked=DARK}
+function setDark(v){DARK=!!v;localStorage.setItem(DARK_KEY,DARK?'1':'0');applyTheme()}
+function setLang(v){LANG=I18N[v]?v:'ca';localStorage.setItem(LANG_KEY,LANG);renderAll()}
+function tType(t){const n=normType(t);return n==='Automàtiques'?L('typeAuto'):n==='Fotoperiòdiques'?L('typePhoto'):n==='Fast Version'?L('typeFast'):L('typeOther')}
+function tAction(a){return {'Germinació':L('actGerm'),'Trasplantament':L('actTransplant'),'Inici floració':L('actFlower'),'Reg':L('actWater'),'Fertilitzant creixement':L('actFeedG'),'Fertilitzant floració':L('actFeedF'),'Poda':L('actPrune'),'Preventiu':L('actPrev'),'Plaga/problema':L('actProblem'),'Observació':L('actObs'),'Collita':L('actHarvest'),'Altres':L('actOther')}[a]||a}
+function tSlot(x){const i=HARVEST_SLOTS.indexOf(x);return I18N[LANG].slots[i>=0?i:0]}
+function applyStatic(){
+ document.documentElement.lang=LANG;document.title=L('title');document.querySelectorAll('h1').forEach(x=>x.textContent=L('title'));
+ document.getElementById('dedicationWelcome').textContent=L('dedication');document.getElementById('dedicationHeader').textContent=L('dedication');
+ document.getElementById('langLabel').textContent=L('lang');document.getElementById('themeLabel').textContent=L('theme');document.getElementById('darkTextWelcome').textContent=L('darkMode');document.getElementById('enterBtn').textContent=L('enter');
+ document.getElementById('langSelect').value=LANG;
+ const tabs=document.querySelectorAll('.tab');tabs[0].innerHTML='<span>🌱</span>'+L('tab_today');tabs[1].innerHTML='<span>🪴</span>'+L('tab_varieties');tabs[2].innerHTML='<span>📝</span>'+L('tab_log');tabs[3].innerHTML='<span>📅</span>'+L('tab_calendar');tabs[4].innerHTML='<span>💾</span>'+L('tab_backup');
+ applyTheme();
+}
+
+function fresh(){return{season:new Date().getFullYear(),varieties:[],logs:[],updatedAt:new Date().toISOString()}}
+function normType(t=''){t=String(t).toLowerCase();if(t.includes('autom'))return'Automàtiques';if(t.includes('fast'))return'Fast Version';if(t.includes('foto')||t.includes('peri'))return'Fotoperiòdiques';return t?String(t):'Altres'}
+function normalizeImportedData(raw){if(!raw||typeof raw!=='object')throw Error('empty');const src=raw.data||raw.state||raw.cultiu_calendari_v1||raw;const vr=Array.isArray(src.varieties)?src.varieties:(Array.isArray(src.varietats)?src.varietats:[]), lr=Array.isArray(src.logs)?src.logs:(Array.isArray(src.registres)?src.registres:[]);if(!vr.length&&!lr.length)throw Error('empty-data');const varieties=vr.map((v,i)=>({id:String(v.id||v.varietyId||'v'+i+'_'+Date.now()),name:String(v.name||v.nom||'Varietat '+(i+1)),brand:String(v.brand||v.marca||''),type:normType(v.type||v.tipus||''),germDate:String(v.germDate||v.germinacio||v.germinació||v.dataGerminacio||''),flowerDate:String(v.flowerDate||v.floracio||v.floració||v.dataFloracio||''),brandWeeks:String(v.brandWeeks||v.setmanes||v.weeks||''),brandHarvest:String(v.brandHarvest||v.collitaExteriorMarca||''),notes:String(v.notes||v.observacions||''),harvestReal:String(v.harvestReal||v.collitaReal||''),harvestMode:String(v.harvestMode||'')}));const ids=new Set(varieties.map(v=>v.id));const logs=lr.map((l,i)=>({id:String(l.id||'l'+i+'_'+Date.now()),date:String(l.date||l.data||''),varietyId:String(l.varietyId||l.varietatId||''),type:String(l.type||l.tipus||'Observació'),note:String(l.note||l.nota||''),photo:String(l.photo||l.foto||'')})).filter(l=>l.date);logs.forEach(l=>{if(l.varietyId&&!ids.has(l.varietyId))l.varietyId=''});return{season:Number(src.season||src.temporada||new Date().getFullYear()),varieties,logs,updatedAt:src.updatedAt||new Date().toISOString()}}
+function load(){for(const k of OLD){try{let r=localStorage.getItem(k);if(r)return normalizeImportedData(JSON.parse(r))}catch(e){}}return fresh()}
+let data=load();
+function save(){data.updatedAt=new Date().toISOString();localStorage.setItem(KEY,JSON.stringify(data))}
+function id(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
+function today(){return new Date().toISOString().slice(0,10)}
+function fmt(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString(locale(),{day:'2-digit',month:'2-digit',year:'numeric'})}
+function days(a,b){return Math.floor((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000)}
+function addDays(d,n){let x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)}
+function esc(s=''){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function toast(m){let t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(window.__t);window.__t=setTimeout(()=>t.style.display='none',2800)}
+function isAuto(v){return normType(v.type)==='Automàtiques'}
+function flowerInfo(v,ref=today()){if(!v.flowerDate)return null;let diff=days(v.flowerDate,ref);return diff<0?{week:0,day:0}:{week:Math.floor(diff/7)+1,day:diff+1}}
+function parseBrandHarvest(s){if(!s)return'';let l=String(s).toLowerCase(),m=null,mm={'setembre':8,'octubre':9,'novembre':10};Object.keys(mm).forEach(k=>{if(l.includes(k))m=mm[k]});let w=(l.match(/([1-4])a/)||[])[1];if(m===null||!w)return'';return new Date(data.season,m,1+(Number(w)-1)*7,12).toISOString().slice(0,10)}
+function harvestDate(v){if(isAuto(v))return(v.germDate&&v.brandWeeks)?addDays(v.germDate,Number(v.brandWeeks)*7):'';let bh=parseBrandHarvest(v.brandHarvest);if(bh)return bh;return(v.flowerDate&&v.brandWeeks)?addDays(v.flowerDate,Number(v.brandWeeks)*7):''}
+function vName(id){return data.varieties.find(v=>v.id===id)?.name||L('generalAll').split('/')[0].trim()}
+function status(v){if(v.harvestReal)return'<span class="pill harvest">'+L('finished')+'</span>';if(v.flowerDate)return'<span class="pill flower">'+L('flowering')+'</span>';return'<span class="pill growth">'+L('growth')+'</span>'}
+function summary(v){let h=harvestDate(v), lines=[], now=today();if(v.germDate)lines.push(L('germLine',{date:fmt(v.germDate),days:Math.max(0,days(v.germDate,now))}));if(v.flowerDate){let f=flowerInfo(v);lines.push(L('flowerLine',{w:f.week,d:f.day}))}else if(v.germDate)lines.push(L('growthDay',{n:Math.max(0,days(v.germDate,now))+1}));if(h){let pct=0;if(isAuto(v)&&v.germDate){pct=Math.min(100,Math.max(0,days(v.germDate,now)/Math.max(1,days(v.germDate,h))*100))}else if(v.flowerDate){pct=Math.min(100,Math.max(0,days(v.flowerDate,now)/Math.max(1,days(v.flowerDate,h))*100))}let left=days(now,h);lines.push(`<div class="progress"><div class="bar" style="width:${pct}%"></div></div>`);lines.push(left>=0?L('harvestEst',{date:fmt(h),days:left}):L('harvestPast',{date:fmt(h),days:Math.abs(left)}))}if(!isAuto(v)&&v.brandHarvest)lines.push(L('outdoorLine',{text:esc(tSlot(v.brandHarvest))}));return lines.join('<div style="height:4px"></div>')||'<span class="muted">'+L('dontKnow')+'</span>'}
+function aClass(t=''){t=String(t).toLowerCase();if(t.includes('plaga')||t.includes('problema')||t.includes('pest'))return'problem';if(t.includes('collita')||t.includes('cosecha')||t.includes('harvest'))return'harvest';if(t.includes('reg')||t.includes('riego')||t.includes('water'))return'water';if(t.includes('fertilitzant')||t.includes('fertilizante')||t.includes('fertilizer'))return'feed';if(t.includes('poda')||t.includes('prun'))return'prune';if(t.includes('prevent'))return'preventive';if(t.includes('trasplant')||t.includes('transplant'))return'transplant';if(t.includes('flor'))return'flower';return'growth'}
+function aLabel(t=''){if(t.includes('Fertilitzant'))return LANG==='ca'?'Fertilitzant':LANG==='es'?'Fertilizante':LANG==='en'?'Fertilizer':'Gødning';if(t.includes('Plaga'))return tAction('Plaga/problema');if(t.includes('Inici'))return L('flowering');return tAction(t).split(' ')[0]||L('action')}
+function logHtml(l){let c=aClass(l.type);return`<div class="event ${c}"><div class="itemHead"><div><b>${fmt(l.date)}</b> · ${esc(vName(l.varietyId))}<div class="tiny muted">${esc(tAction(l.type))}</div></div><span class="pill ${c}">${esc(aLabel(l.type))}</span></div>${l.note?`<div style="margin-top:8px">${esc(l.note)}</div>`:''}${l.photo?`<img class="photo" src="${l.photo}">`:''}<div class="inlineBtns"><button class="btn small secondary" onclick="deleteLog('${l.id}')">${L('delete')}</button></div></div>`}
+function renderToday(){let html=`<div class="card"><div class="big">${L('season')} ${data.season}</div><div class="muted">${L('seasonRange')} · ${data.varieties.length}/10 ${L('created')}</div></div>`;INTERNAL_TYPES.forEach(type=>{let arr=data.varieties.filter(v=>normType(v.type)===type);if(!arr.length)return;html+=`<div class="card"><div class="title">${tType(type)}</div><div style="height:10px"></div>${arr.map(v=>`<div class="item"><div class="itemHead"><div><div class="title">${esc(v.name)}</div><div class="tiny muted">${esc(v.brand||L('noBrand'))}</div></div>${status(v)}</div><div style="margin-top:10px">${summary(v)}</div><div class="inlineBtns"><button class="btn small" onclick="quickLog('${v.id}')">${L('addRecord')}</button><button class="btn small secondary" onclick="goTab('varieties');editVariety('${v.id}')">${L('edit')}</button></div></div>`).join('')}</div>`});if(!data.varieties.length)html+=`<div class="card empty">${L('noVar')}</div>`;let rec=[...data.logs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);html+=`<div class="card"><div class="title">${L('recent')}</div>${rec.length?rec.map(logHtml).join(''):'<div class="empty">'+L('noLogs')+'</div>'}</div>`;document.getElementById('today').innerHTML=html}
+function renderVarieties(editId='',show=false){let edit=editId?data.varieties.find(v=>v.id===editId):null, html=`<div class="card"><div class="itemHead"><div><div class="big">${L('varieties')}</div><div class="muted tiny">${data.varieties.length}/10 ${L('created2')}</div></div><button class="btn small" onclick="renderVarieties('',true)">${L('newVariety')}</button></div></div>`;if(show||edit){let cur=normType(edit?.type||'Fotoperiòdiques'), opts=INTERNAL_TYPES.map(x=>`<option value="${x}" ${cur===x?'selected':''}>${tType(x)}</option>`).join('');html+=`<div class="card"><div class="big">${edit?L('editVariety'):L('newVariety')}</div><input id="vId" type="hidden" value="${edit?.id||''}"><label>${L('name')}</label><input id="vName" value="${esc(edit?.name||'')}"><div class="row"><div><label>${L('brand')}</label><input id="vBrand" value="${esc(edit?.brand||'')}"></div><div><label>${L('type')}</label><select id="vType" onchange="toggleTypeFields()">${opts}</select></div></div><div class="row"><div><label>${L('germination')}</label><input id="vGerm" type="date" value="${edit?.germDate||''}"></div><div><label>${L('flowerStart')}</label><input id="vFlower" type="date" value="${edit?.flowerDate||''}"></div></div><div class="row"><div><label>${L('flowerTime')}</label><select id="vWeeks"><option value="">${L('dontKnow')}</option>${[7,8,9,10,11,12,13].map(n=>`<option value="${n}" ${String(edit?.brandWeeks||'')===String(n)?'selected':''}>${n} ${L('weeks')}</option>`).join('')}</select></div><div id="brandHarvestWrap" class="${cur==='Automàtiques'?'hidden':''}"><label>${L('outdoorHarvest')}</label><select id="vBrandHarvest">${HARVEST_SLOTS.map((x,i)=>`<option value="${x}" ${(edit?.brandHarvest||'')===x?'selected':''}>${I18N[LANG].slots[i]}</option>`).join('')}</select></div></div><label>${L('notes')}</label><textarea id="vNotes">${esc(edit?.notes||'')}</textarea><div class="inlineBtns"><button class="btn" onclick="saveVariety()">${L('saveVariety')}</button><button class="btn secondary" onclick="renderVarieties()">${L('cancel')}</button></div></div>`}html+=`<div class="card"><div class="title">${L('list')}</div><div style="height:10px"></div>${data.varieties.length?data.varieties.map(v=>`<div class="item"><div class="itemHead"><div><div class="title">${esc(v.name)}</div><div class="tiny muted">${L('type')}: ${esc(tType(v.type))} · ${L('germination')}: ${fmt(v.germDate)} · ${L('flowering')}: ${fmt(v.flowerDate)}</div></div>${status(v)}</div><div style="margin-top:8px">${summary(v)}</div><div class="inlineBtns"><button class="btn small secondary" onclick="editVariety('${v.id}')">${L('edit')}</button><button class="btn small danger" onclick="deleteVariety('${v.id}')">${L('delete')}</button></div></div>`).join(''):'<div class="empty">'+L('noVar')+'</div>'}</div>`;document.getElementById('varieties').innerHTML=html;toggleTypeFields()}
+function toggleTypeFields(){let s=document.getElementById('vType'),w=document.getElementById('brandHarvestWrap');if(!s||!w)return;w.classList.toggle('hidden',normType(s.value)==='Automàtiques')}
+function val(i){return document.getElementById(i).value.trim()}
+function saveVariety(){let vid=val('vId');if(!vid&&data.varieties.length>=10){toast(L('maxVar'));return}let name=val('vName');if(!name){toast(L('setName'));return}let type=normType(val('vType')), old=data.varieties.find(v=>v.id===vid)||{};let obj={id:vid||id(),name,brand:val('vBrand'),type,germDate:val('vGerm'),flowerDate:val('vFlower'),brandWeeks:val('vWeeks'),brandHarvest:type==='Automàtiques'?'':val('vBrandHarvest'),notes:val('vNotes'),harvestReal:old.harvestReal||'',harvestMode:old.harvestMode||''};if(vid)data.varieties=data.varieties.map(v=>v.id===vid?obj:v);else data.varieties.push(obj);save();renderAll();goTab('today');toast(L('varSaved'))}
+function editVariety(vid){renderVarieties(vid,true);scrollTo(0,0)}
+function deleteVariety(vid){if(!confirm(L('confirmDeleteVar')))return;data.varieties=data.varieties.filter(v=>v.id!==vid);data.logs=data.logs.filter(l=>l.varietyId!==vid);save();renderAll();toast(L('deleted'))}
+function renderLog(pref='',show=false){let opts=`<option value="">${L('generalAll')}</option>`+data.varieties.map(v=>`<option value="${v.id}" ${pref===v.id?'selected':''}>${esc(v.name)}</option>`).join(''), html=`<div class="card"><div class="itemHead"><div><div class="big">${L('record')}</div><div class="muted tiny">${data.logs.length} ${L('records').toLowerCase()}</div></div><button class="btn small" onclick="renderLog('',true)">${L('addRecord')}</button></div></div>`;if(show||pref)html+=`<div class="card" id="logForm"><div class="big">${L('addRecord')}</div><div class="row"><div><label>${L('date')}</label><input id="lDate" type="date" value="${today()}"></div><div><label>${L('variety')}</label><select id="lVariety">${opts}</select></div></div><div class="row"><div><label>${L('action')}</label><select id="lType">${INTERNAL_ACTIONS.map(x=>`<option value="${x}">${tAction(x)}</option>`).join('')}</select></div><div><label>${L('photo')}</label><input id="lPhoto" type="file" accept="image/*" capture="environment"></div></div><label>${L('note')}</label><textarea id="lNote"></textarea><button class="btn full" onclick="saveLog()">${L('saveRecord')}</button></div>`;html+=`<div class="card"><div class="title">${L('history')}</div>${data.logs.length?[...data.logs].sort((a,b)=>b.date.localeCompare(a.date)).map(logHtml).join(''):'<div class="empty">'+L('noLogs')+'</div>'}</div>`;document.getElementById('log').innerHTML=html}
+function quickLog(vid){goTab('log');renderLog(vid,true);setTimeout(()=>document.getElementById('logForm')?.scrollIntoView({behavior:'smooth'}),40)}
+function resizePhoto(f){return new Promise((res,rej)=>{if(!f)return res('');let img=new Image(),r=new FileReader();r.onload=e=>{img.onload=()=>{let max=1000,w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max}else if(h>=w&&h>max){w=Math.round(w*max/h);h=max}let c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',.78))};img.src=e.target.result};r.onerror=rej;r.readAsDataURL(f)})}
+async function saveLog(){let photo=await resizePhoto(document.getElementById('lPhoto').files[0]),l={id:id(),date:val('lDate'),varietyId:val('lVariety'),type:val('lType'),note:val('lNote'),photo};if(!l.date)return toast(L('pickDate'));data.logs.push(l);let v=data.varieties.find(v=>v.id===l.varietyId);if(v){if(l.type==='Inici floració'&&!v.flowerDate)v.flowerDate=l.date;if(l.type==='Germinació'&&!v.germDate)v.germDate=l.date;if(l.type==='Collita')v.harvestReal=l.date}save();renderAll();goTab('today');toast(L('logSaved'))}
+function deleteLog(lid){if(!confirm(L('confirmDeleteLog')))return;data.logs=data.logs.filter(l=>l.id!==lid);save();renderAll();toast(L('logDeleted'))}
+function renderCalendar(){let ev=[];data.logs.forEach(l=>ev.push({...l}));data.varieties.forEach(v=>{let h=harvestDate(v);if(h)ev.push({date:h,varietyId:v.id,type:L('harvestEstimated'),note:isAuto(v)?`${L('estimate')} ${v.brandWeeks||'?'} ${L('fromGerm')}`:(v.brandHarvest?tSlot(v.brandHarvest):L('estimate'))})});ev=ev.filter(e=>months.includes(new Date(e.date+'T12:00:00').getMonth())).sort((a,b)=>a.date.localeCompare(b.date));let html=`<div class="card"><div class="big">${L('calendar')} ${data.season}</div><div class="muted">${L('seasonRange')}</div></div>`;months.forEach(m=>{let arr=ev.filter(e=>new Date(e.date+'T12:00:00').getMonth()===m);html+=`<h2 class="month">${I18N[LANG].months[m]}</h2>`;if(!arr.length){html+='<div class="empty">'+L('noRecords')+'</div>';return}let g={};arr.forEach(e=>(g[e.date]??=[]).push(e));Object.keys(g).forEach(d=>{html+=`<div class="day"><div class="datebox">${new Date(d+'T12:00:00').getDate()}</div><div>${g[d].map(e=>`<div class="event ${aClass(e.type)}"><b>${esc(tAction(e.type))}</b> · ${esc(vName(e.varietyId))}<div class="tiny muted">${esc(e.note||'')}</div></div>`).join('')}</div></div>`})});document.getElementById('calendar').innerHTML=html}
+function renderBackup(){document.getElementById('backup').innerHTML=`<div class="card"><div class="big">${L('copies')}</div><p class="muted">${L('copiesText')}</p><div class="warn">${L('copiesWarn')}</div><div style="height:12px"></div><button class="btn full" onclick="exportData()">${L('exportCopy')}</button><div style="height:10px"></div><label>${L('importCopy')}</label><input type="file" accept=".json,application/json,text/plain" onchange="importData(event)"><div style="height:16px"></div><label>${L('theme')}</label><div class="switchRow"><input id="darkSwitchBackup" class="switch" type="checkbox" onchange="setDark(this.checked)"><span>${L('darkMode')}</span></div><div style="height:16px"></div><button class="btn secondary full" onclick="newSeason()">${L('newSeason')}</button></div><div class="card"><div class="title">${L('status')}</div><div class="muted tiny">${L('saved')}: ${new Date(data.updatedAt||Date.now()).toLocaleString(locale())}</div><div class="muted tiny">${L('varieties')}: ${data.varieties.length} · ${L('records')}: ${data.logs.length}</div></div>`;applyTheme()}
+function exportData(){let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`calendari-cultiu-${data.season}.json`;a.click();URL.revokeObjectURL(a.href);toast(L('exported'))}
+function importData(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=e=>{try{data=normalizeImportedData(JSON.parse(e.target.result));save();renderAll();goTab('today');toast(L('imported',{v:data.varieties.length,l:data.logs.length}));ev.target.value=''}catch(err){console.error(err);toast(L('cantImport'))}};r.readAsText(f)}
+function newSeason(){if(!confirm(L('confirmNewSeason')))return;data=fresh();save();renderAll();goTab('today');toast(L('seasonCreated'))}
+function goTab(n){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(n).classList.add('active');document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===n));scrollTo(0,0)}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{goTab(b.dataset.tab);if(b.dataset.tab==='varieties')renderVarieties();if(b.dataset.tab==='log')renderLog()}));
+document.getElementById('enterBtn').addEventListener('click',()=>document.getElementById('welcome').classList.add('hidden'));
+document.getElementById('langSelect').addEventListener('change',e=>setLang(e.target.value));
+document.getElementById('darkSwitchWelcome').addEventListener('change',e=>setDark(e.target.checked));
+function renderAll(){applyStatic();renderToday();renderVarieties();renderLog();renderCalendar();renderBackup();applyTheme()}
+renderAll();
+</script>
+</body></html>
